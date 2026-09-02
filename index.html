@@ -1,12 +1,8 @@
 <!DOCTYPE html>
 <html lang="th">
-
 <head>
-
 <meta charset="UTF-8">
-
-<meta name="viewport"
-content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>Pharma Copilot</title>
 
@@ -14,137 +10,128 @@ content="width=device-width, initial-scale=1.0">
 
 body {
   font-family: Arial, sans-serif;
-  max-width: 1000px;
-  margin: auto;
-  padding: 25px;
   background: #f5f3ff;
+  margin: 0;
+  padding: 30px;
+}
+
+.container {
+  max-width: 900px;
+  margin: auto;
+  background: white;
+  padding: 30px;
+  border-radius: 20px;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.1);
 }
 
 h1 {
   text-align: center;
-  color: #5b3b95;
 }
 
 h2 {
-  color: #5b3b95;
-}
-
-.card {
-  background: white;
-  padding: 20px;
-  margin-top: 20px;
-  border-radius: 15px;
-  box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+  margin-top: 30px;
 }
 
 button {
-  padding: 13px 25px;
-  margin: 5px;
+  padding: 12px 20px;
   border: none;
   border-radius: 10px;
-  font-size: 17px;
   cursor: pointer;
+  margin: 5px;
+  font-size: 16px;
 }
 
 #startBtn {
-  background: #6c4ab6;
+  background: #6c5ce7;
   color: white;
 }
 
 #stopBtn {
-  background: #999;
+  background: #d63031;
   color: white;
 }
 
 #nextBtn {
-  background: #4caf50;
+  background: #0984e3;
   color: white;
 }
 
-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-#status {
-  padding: 15px;
+#statusBox {
   margin-top: 15px;
-  border-radius: 10px;
+  padding: 15px;
   background: #eee;
-  font-size: 18px;
+  border-radius: 10px;
 }
 
 #transcript {
-  min-height: 150px;
-  padding: 15px;
+  margin-top: 20px;
+  padding: 20px;
   background: #fafafa;
+  border: 1px solid #ddd;
   border-radius: 10px;
-  line-height: 1.8;
-  font-size: 18px;
+  min-height: 120px;
   white-space: pre-wrap;
 }
 
-.check-item {
-  padding: 12px;
-  margin: 7px 0;
+.checklist {
+  margin-top: 20px;
+}
+
+.item {
+  padding: 10px;
+  margin: 5px 0;
   border-radius: 8px;
-  background: #eee;
+  background: #f1f2f6;
 }
 
 .done {
-  background: #d9f5df;
+  background: #dff9fb;
 }
 
 .missing {
-  background: #ffe0e0;
+  background: #ffeaa7;
 }
 
 .score {
-  font-size: 22px;
+  font-size: 20px;
   font-weight: bold;
-  margin: 15px 0;
-}
-
-.small {
-  color: #666;
-  font-size: 14px;
+  margin-top: 20px;
 }
 
 </style>
-
 </head>
 
 
 <body>
 
+<div class="container">
 
 <h1>💊 Pharma Copilot</h1>
 
+<p>
+ระบบช่วยตรวจสอบความครบถ้วนในการซักประวัติและให้คำแนะนำยา
+</p>
+
 
 <!-- ========================= -->
-<!-- CONTROL -->
+<!-- BUTTON -->
 <!-- ========================= -->
-
-<div class="card">
-
-<h2>🎙️ การสนทนา</h2>
 
 <button id="startBtn">
-🎙️ START
+🎙️ เริ่มบันทึกเสียง
 </button>
 
-<button id="stopBtn" disabled>
-⏹️ STOP
+<button id="stopBtn">
+⏹ หยุดบันทึก
 </button>
 
-<button id="nextBtn" disabled>
+<button id="nextBtn">
 ➡️ NEXT
 </button>
 
-<div id="status">
-สถานะ: ยังไม่ได้เริ่ม
-</div>
 
+<div id="statusBox">
+สถานะ: พร้อมใช้งาน
 </div>
 
 
@@ -152,121 +139,73 @@ button:disabled {
 <!-- TRANSCRIPT -->
 <!-- ========================= -->
 
-<div class="card">
-
-<h2>📝 ข้อความที่ระบบจับได้</h2>
+<h2>📝 Transcript</h2>
 
 <div id="transcript">
 ยังไม่มีข้อความ
 </div>
 
-</div>
-
 
 <!-- ========================= -->
-<!-- HISTORY CHECKLIST -->
+<!-- CHECKLIST -->
 <!-- ========================= -->
 
-<div class="card">
+<h2>📋 History Checklist</h2>
 
-<h2>📋 Checklist การซักประวัติ</h2>
+<div id="historyChecklist" class="checklist"></div>
 
-<div id="historyChecklist"></div>
 
-<div id="historyScore"
-class="score">
-คะแนน: 0 / 16
-</div>
-
+<div class="score" id="historyScore">
+History Score: -
 </div>
 
 
-<!-- ========================= -->
-<!-- COUNSELING -->
-<!-- ========================= -->
+<h2>💊 Counseling Checklist</h2>
 
-<div class="card">
+<div id="counselingChecklist" class="checklist"></div>
 
-<h2>💊 Checklist คำแนะนำยา</h2>
 
-<div id="counselingChecklist"></div>
-
-<div id="counselingScore"
-class="score">
-คะแนน: 0 / 4
-</div>
-
+<div class="score" id="counselingScore">
+Counseling Score: -
 </div>
 
 
-<!-- ========================= -->
-<!-- RESULT -->
-<!-- ========================= -->
-
-<div class="card">
-
-<h2>📊 ผลการตรวจสอบ</h2>
-
-<div id="result">
-ยังไม่มีผลการตรวจสอบ
 </div>
-
-</div>
-
 
 
 <script>
 
 
-/* =====================================================
-   APPS SCRIPT URL
-===================================================== */
+// =====================================================
+// APPS SCRIPT API
+// =====================================================
 
 const API_URL =
-"https://script.google.com/macros/s/AKfycbz7KRPTS__BZKxORoDi42W4DAVCEyMekpQg8X--vbLsTUkmR6Xud4Hmu1kZnPFtZ6QobA/exec";
+"https://script.google.com/macros/s/AKfycby-1f6yKecrhwL6zphf8qiyWlt5lCY_E8RMAZhNB9RwyfZbNy_bQ7a0JS2jubMfQgE9qA/exec";
 
 
-
-/* =====================================================
-   HISTORY CHECKLIST H01-H16
-===================================================== */
+// =====================================================
+// CHECKLIST
+// =====================================================
 
 const historyChecklist = [
 
 {
 id:"H01",
 name:"ใครคือผู้ป่วย",
-keywords:[
-"ชื่อ",
-"ผู้ป่วย",
-"คนไข้",
-"ชื่ออะไร",
-"ชื่ออะไรคะ",
-"ชื่ออะไรครับ"
-]
+keywords:["ชื่อ","ผู้ป่วย","คนไข้"]
 },
 
 {
 id:"H02",
 name:"อายุ",
-keywords:[
-"อายุ",
-"กี่ปี",
-"อายุเท่าไหร่",
-"อายุเท่าไร"
-]
+keywords:["อายุ","กี่ปี"]
 },
 
 {
 id:"H03",
 name:"น้ำหนัก",
-keywords:[
-"น้ำหนัก",
-"หนักกี่กิโล",
-"หนักเท่าไหร่",
-"หนักเท่าไร",
-"กี่กิโล"
-]
+keywords:["น้ำหนัก","หนักกี่กิโล"]
 },
 
 {
@@ -278,9 +217,7 @@ keywords:[
 "ผู้หญิง",
 "ตั้งครรภ์",
 "ท้อง",
-"ตั้งท้อง",
-"ให้นม",
-"ให้นมลูก"
+"ให้นม"
 ]
 },
 
@@ -291,8 +228,7 @@ keywords:[
 "เป็นอะไร",
 "มีอาการอะไร",
 "อาการอะไร",
-"มาด้วยอาการ",
-"วันนี้เป็นอะไร"
+"มาด้วยอาการ"
 ]
 },
 
@@ -304,24 +240,19 @@ keywords:[
 "เริ่มเป็น",
 "เป็นตั้งแต่",
 "กี่วัน",
-"เมื่อไร",
-"เป็นมากี่วัน",
-"เป็นตั้งแต่วันไหน",
-"เป็นมานานแค่ไหน"
+"เมื่อไร"
 ]
 },
 
 {
 id:"H07",
-name:"ความรุนแรงของอาการเทียบกับวันแรก",
+name:"ความรุนแรงเทียบกับวันแรก",
 keywords:[
 "รุนแรง",
 "หนักขึ้น",
 "ดีขึ้น",
 "แย่ลง",
-"เทียบกับวันแรก",
-"ต่างกันไหม",
-"ตอนนี้กับวันแรก"
+"เทียบกับวันแรก"
 ]
 },
 
@@ -331,8 +262,7 @@ name:"เคยมีอาการเช่นนี้มาก่อน",
 keywords:[
 "เคยเป็น",
 "เคยมีอาการ",
-"มาก่อน",
-"เคยเป็นมาก่อน"
+"มาก่อน"
 ]
 },
 
@@ -342,8 +272,7 @@ name:"มีอาการอื่นร่วม",
 keywords:[
 "อาการร่วม",
 "มีอาการอื่น",
-"ร่วมด้วย",
-"อาการอื่นร่วม"
+"ร่วมด้วย"
 ]
 },
 
@@ -352,7 +281,6 @@ id:"H10",
 name:"สิ่งที่ทำให้อาการแย่ลง",
 keywords:[
 "แย่ลง",
-"อาการแย่ลง",
 "กระตุ้น",
 "ทำให้อาการมากขึ้น"
 ]
@@ -363,8 +291,6 @@ id:"H11",
 name:"สิ่งที่ทำให้อาการดีขึ้น",
 keywords:[
 "ดีขึ้น",
-"อาการดีขึ้น",
-"ช่วย",
 "บรรเทา",
 "ทำให้อาการดีขึ้น"
 ]
@@ -376,21 +302,17 @@ name:"โรคประจำตัว / ยาที่ได้รับ",
 keywords:[
 "โรคประจำตัว",
 "ยาประจำ",
-"ยาที่ใช้",
 "กินยาอะไร",
-"ใช้ยาอะไร",
-"ยาที่รับประทาน",
-"ทุกวัน"
+"ยาที่ใช้"
 ]
 },
 
 {
 id:"H13",
-name:"ประวัติสูบบุหรี่ / ดื่มแอลกอฮอล์",
+name:"บุหรี่ / แอลกอฮอล์",
 keywords:[
-"บุหรี่",
 "สูบบุหรี่",
-"เหล้า",
+"บุหรี่",
 "ดื่มเหล้า",
 "แอลกอฮอล์",
 "สุรา"
@@ -399,26 +321,23 @@ keywords:[
 
 {
 id:"H14",
-name:"ยา/ผลิตภัณฑ์อื่นที่ใช้บรรเทาอาการ",
+name:"ยา/ผลิตภัณฑ์ที่ใช้บรรเทาอาการ",
 keywords:[
-"บรรเทาอาการ",
-"รักษาอาการ",
 "เคยกินยา",
+"ใช้ยาอะไร",
 "ซื้อยากิน",
-"ใช้ผลิตภัณฑ์",
-"ใช้ยาอะไร"
+"ใช้ผลิตภัณฑ์"
 ]
 },
 
 {
 id:"H15",
-name:"ประวัติแพ้ยา / แพ้สิ่งอื่น",
+name:"ประวัติแพ้ยา/สิ่งอื่น",
 keywords:[
 "แพ้ยา",
-"แพ้อาหาร",
 "แพ้อะไร",
 "ประวัติแพ้",
-"แพ้ยาอะไร"
+"แพ้อาหาร"
 ]
 },
 
@@ -428,9 +347,6 @@ name:"เคยใช้ยานี้และมีอาการไม่�
 keywords:[
 "เคยใช้ยานี้",
 "เคยกินยานี้",
-"เคยทาน",
-"เคยกิน",
-"เคยใช้",
 "ผลข้างเคียง",
 "อาการไม่พึงประสงค์"
 ]
@@ -438,11 +354,6 @@ keywords:[
 
 ];
 
-
-
-/* =====================================================
-   COUNSELING C01-C04
-===================================================== */
 
 const counselingChecklist = [
 
@@ -454,9 +365,7 @@ keywords:[
 "วิธีกิน",
 "กินครั้งละ",
 "หลังอาหาร",
-"ก่อนอาหาร",
-"ทานหลังอาหาร",
-"ทานก่อนอาหาร"
+"ก่อนอาหาร"
 ]
 },
 
@@ -472,7 +381,7 @@ keywords:[
 
 {
 id:"C03",
-name:"การเก็บรักษายา",
+name:"การเก็บรักษา",
 keywords:[
 "เก็บยา",
 "การเก็บรักษา",
@@ -483,123 +392,235 @@ keywords:[
 
 {
 id:"C04",
-name:"การรักษาโดยไม่ใช้ยา / การดูแลตนเอง",
+name:"การรักษาโดยไม่ใช้ยา / ดูแลตนเอง",
 keywords:[
 "ดูแลตัวเอง",
 "ดูแลตนเอง",
 "ไม่ใช้ยา",
 "พักผ่อน",
-"ดื่มน้ำ",
-"ดูแล"
+"ดื่มน้ำ"
 ]
 }
 
 ];
 
 
-
-/* =====================================================
-   VARIABLES
-===================================================== */
+// =====================================================
+// SPEECH RECOGNITION
+// =====================================================
 
 const SpeechRecognition =
 window.SpeechRecognition ||
 window.webkitSpeechRecognition;
 
 
-const startBtn =
-document.getElementById("startBtn");
-
-const stopBtn =
-document.getElementById("stopBtn");
-
-const nextBtn =
-document.getElementById("nextBtn");
-
-const statusBox =
-document.getElementById("status");
-
-const transcriptBox =
-document.getElementById("transcript");
-
-
 let recognition;
-
-let isListening = false;
 
 let finalText = "";
 
+let isListening = false;
 
 
-/* =====================================================
-   DISPLAY CHECKLIST
-===================================================== */
+if (!SpeechRecognition) {
 
-function displayChecklist() {
+alert(
+"Browser นี้ไม่รองรับ Speech Recognition\nกรุณาใช้ Google Chrome"
+);
 
-const historyDiv =
-document.getElementById("historyChecklist");
+}
+else {
 
-const counselingDiv =
-document.getElementById("counselingChecklist");
+recognition =
+new SpeechRecognition();
+
+recognition.lang =
+"th-TH";
+
+recognition.continuous =
+true;
+
+recognition.interimResults =
+true;
+
+recognition.maxAlternatives =
+1;
 
 
-historyDiv.innerHTML = "";
+recognition.onstart =
+function() {
 
-counselingDiv.innerHTML = "";
+isListening = true;
+
+statusBox.innerText =
+"🎙️ กำลังฟัง...";
+
+};
 
 
-historyChecklist.forEach(item => {
+recognition.onresult =
+function(event) {
+
+let interimText = "";
+
+for (
+let i = event.resultIndex;
+i < event.results.length;
+i++
+) {
+
+const text =
+event.results[i][0].transcript;
+
+
+if (
+event.results[i].isFinal
+) {
+
+finalText +=
+text + " ";
+
+}
+else {
+
+interimText +=
+text;
+
+}
+
+}
+
+
+document.getElementById(
+"transcript"
+).innerText =
+finalText + interimText;
+
+};
+
+
+recognition.onerror =
+function(event) {
+
+console.error(
+"Speech error:",
+event.error
+);
+
+statusBox.innerText =
+"⚠️ Speech error: " +
+event.error;
+
+};
+
+
+recognition.onend =
+function() {
+
+isListening = false;
+
+statusBox.innerText =
+"⏹ หยุดฟังแล้ว";
+
+};
+
+}
+
+
+// =====================================================
+// START
+// =====================================================
+
+document.getElementById("startBtn")
+.onclick =
+function() {
+
+if (!recognition)
+return;
+
+finalText = "";
+
+document.getElementById(
+"transcript"
+).innerText =
+"กำลังฟัง...";
+
+recognition.start();
+
+};
+
+
+// =====================================================
+// STOP
+// =====================================================
+
+document.getElementById("stopBtn")
+.onclick =
+function() {
+
+if (!recognition)
+return;
+
+recognition.stop();
+
+};
+
+
+// =====================================================
+// DISPLAY CHECKLIST
+// =====================================================
+
+function displayChecklist(
+list,
+containerId
+) {
+
+const container =
+document.getElementById(
+containerId
+);
+
+container.innerHTML = "";
+
+
+list.forEach(
+function(item) {
 
 const div =
 document.createElement("div");
 
-div.id = item.id;
-
 div.className =
-"check-item missing";
+"item";
+
+div.id =
+item.id;
 
 div.innerHTML =
-"🔴 <b>" +
+"⬜ " +
 item.id +
-"</b> — " +
+" — " +
 item.name;
 
-historyDiv.appendChild(div);
-
-});
-
-
-counselingChecklist.forEach(item => {
-
-const div =
-document.createElement("div");
-
-div.id = item.id;
-
-div.className =
-"check-item missing";
-
-div.innerHTML =
-"🔴 <b>" +
-item.id +
-"</b> — " +
-item.name;
-
-counselingDiv.appendChild(div);
+container.appendChild(div);
 
 });
 
 }
 
 
-displayChecklist();
+displayChecklist(
+historyChecklist,
+"historyChecklist"
+);
+
+displayChecklist(
+counselingChecklist,
+"counselingChecklist"
+);
 
 
-
-/* =====================================================
-   CHECK KEYWORDS
-===================================================== */
+// =====================================================
+// CHECK CHECKLIST
+// =====================================================
 
 function checkChecklist(text) {
 
@@ -607,608 +628,345 @@ const lowerText =
 text.toLowerCase();
 
 
-let historyScore = 0;
+let historyDone = 0;
 
-let counselingScore = 0;
-
-
-/* HISTORY */
-
-historyChecklist.forEach(item => {
-
-const found =
-item.keywords.some(keyword =>
-lowerText.includes(keyword.toLowerCase())
-);
-
-
-const div =
-document.getElementById(item.id);
-
-
-if(found) {
-
-div.className =
-"check-item done";
-
-div.innerHTML =
-"🟢 <b>" +
-item.id +
-"</b> — " +
-item.name;
-
-historyScore++;
-
-} else {
-
-div.className =
-"check-item missing";
-
-div.innerHTML =
-"🔴 <b>" +
-item.id +
-"</b> — " +
-item.name;
-
-}
-
-});
-
-
-/* COUNSELING */
-
-counselingChecklist.forEach(item => {
-
-const found =
-item.keywords.some(keyword =>
-lowerText.includes(keyword.toLowerCase())
-);
-
-
-const div =
-document.getElementById(item.id);
-
-
-if(found) {
-
-div.className =
-"check-item done";
-
-div.innerHTML =
-"🟢 <b>" +
-item.id +
-"</b> — " +
-item.name;
-
-counselingScore++;
-
-} else {
-
-div.className =
-"check-item missing";
-
-div.innerHTML =
-"🔴 <b>" +
-item.id +
-"</b> — " +
-item.name;
-
-}
-
-});
-
-
-document.getElementById("historyScore")
-.innerText =
-"คะแนนการซักประวัติ: " +
-historyScore +
-" / 16";
-
-
-document.getElementById("counselingScore")
-.innerText =
-"คะแนนคำแนะนำยา: " +
-counselingScore +
-" / 4";
-
-
-return {
-historyScore,
-counselingScore
-};
-
-}
-
-
-
-/* =====================================================
-   SPEECH RECOGNITION
-===================================================== */
-
-if(!SpeechRecognition) {
-
-statusBox.innerText =
-"❌ Browser ไม่รองรับ Speech Recognition";
-
-startBtn.disabled = true;
-
-} else {
-
-
-recognition =
-new SpeechRecognition();
-
-
-recognition.lang =
-"th-TH";
-
-
-recognition.continuous =
-true;
-
-
-recognition.interimResults =
-true;
-
-
-recognition.maxAlternatives =
-1;
-
-
-
-/* START */
-
-startBtn.onclick = function() {
-
-finalText = "";
-
-transcriptBox.innerText =
-"กำลังรอฟังเสียง...";
-
-isListening = true;
-
-startBtn.disabled = true;
-
-stopBtn.disabled = false;
-
-nextBtn.disabled = true;
-
-
-statusBox.innerText =
-"🟡 กำลังเปิดระบบรับเสียง...";
-
-
-try {
-
-recognition.start();
-
-} catch(error) {
-
-console.log(error);
-
-}
-
-};
-
-
-
-/* ON START */
-
-recognition.onstart = function() {
-
-console.log("Recognition started");
-
-statusBox.innerText =
-"🟢 กำลังฟังเสียง... พูดได้เลย";
-
-};
-
-
-
-/* ON RESULT */
-
-recognition.onresult =
-function(event) {
-
-
-let interimText = "";
-
-
-for(
-let i = event.resultIndex;
-i < event.results.length;
-i++
-) {
-
-
-const transcript =
-event.results[i][0].transcript;
-
-
-if(event.results[i].isFinal) {
-
-finalText +=
-transcript + " ";
-
-} else {
-
-interimText +=
-transcript;
-
-}
-
-}
-
-
-/* แสดงข้อความ */
-
-transcriptBox.innerText =
-finalText + interimText;
-
-
-/* ตรวจ Checklist */
-
-checkChecklist(
-finalText + interimText
-);
-
-
-nextBtn.disabled = false;
-
-
-console.log(
-"Transcript:",
-finalText + interimText
-);
-
-};
-
-
-
-/* ERROR */
-
-recognition.onerror =
-function(event) {
-
-console.error(
-"Speech Error:",
-event.error
-);
-
-
-statusBox.innerText =
-"❌ Speech Error: " +
-event.error;
-
-};
-
-
-
-/* STOP */
-
-stopBtn.onclick =
-function() {
-
-isListening = false;
-
-recognition.stop();
-
-startBtn.disabled = false;
-
-stopBtn.disabled = true;
-
-nextBtn.disabled = false;
-
-
-statusBox.innerText =
-"⏹️ หยุดรับเสียงแล้ว";
-
-};
-
-
-
-/* AUTO RESTART */
-
-recognition.onend =
-function() {
-
-console.log(
-"Recognition ended"
-);
-
-
-if(isListening) {
-
-statusBox.innerText =
-"🔄 กำลังเปิดการฟังใหม่...";
-
-
-setTimeout(
-function() {
-
-try {
-
-recognition.start();
-
-} catch(error) {
-
-console.log(error);
-
-}
-
-},
-500
-);
-
-}
-
-};
-
-}
-
-
-
-/* =====================================================
-   NEXT
-===================================================== */
-
-nextBtn.onclick =
-function() {
-
-
-const result =
-checkChecklist(finalText);
-
+let counselingDone = 0;
 
 let missingHistory = [];
 
 let missingCounseling = [];
 
 
-/* Missing History */
-
-historyChecklist.forEach(item => {
+historyChecklist.forEach(
+function(item) {
 
 const found =
-item.keywords.some(keyword =>
-finalText.toLowerCase()
-.includes(keyword.toLowerCase())
+item.keywords.some(
+function(keyword) {
+
+return lowerText.includes(
+keyword.toLowerCase()
+);
+
+});
+
+
+const element =
+document.getElementById(
+item.id
 );
 
 
-if(!found) {
+if (found) {
+
+historyDone++;
+
+element.className =
+"item done";
+
+element.innerHTML =
+"✅ " +
+item.id +
+" — " +
+item.name;
+
+}
+else {
 
 missingHistory.push(
-item.id + " — " + item.name
+item.id +
+" — " +
+item.name
 );
+
+element.className =
+"item missing";
+
+element.innerHTML =
+"⚠️ " +
+item.id +
+" — " +
+item.name;
 
 }
 
 });
 
 
-/* Missing Counseling */
-
-counselingChecklist.forEach(item => {
+counselingChecklist.forEach(
+function(item) {
 
 const found =
-item.keywords.some(keyword =>
-finalText.toLowerCase()
-.includes(keyword.toLowerCase())
+item.keywords.some(
+function(keyword) {
+
+return lowerText.includes(
+keyword.toLowerCase()
+);
+
+});
+
+
+const element =
+document.getElementById(
+item.id
 );
 
 
-if(!found) {
+if (found) {
+
+counselingDone++;
+
+element.className =
+"item done";
+
+element.innerHTML =
+"✅ " +
+item.id +
+" — " +
+item.name;
+
+}
+else {
 
 missingCounseling.push(
-item.id + " — " + item.name
+item.id +
+" — " +
+item.name
 );
 
-}
+element.className =
+"item missing";
 
-});
-
-
-let html = "";
-
-
-html +=
-"<h3>📋 สรุปผล</h3>";
-
-
-html +=
-"<p><b>ซักประวัติ:</b> " +
-result.historyScore +
-" / 16</p>";
-
-
-html +=
-"<p><b>คำแนะนำยา:</b> " +
-result.counselingScore +
-" / 4</p>";
-
-
-html +=
-"<hr>";
-
-
-html +=
-"<h3>⚠️ หัวข้อซักประวัติที่ยังไม่พบ</h3>";
-
-
-if(missingHistory.length === 0) {
-
-html +=
-"<p>🟢 ซักประวัติครบทุกหัวข้อ</p>";
-
-} else {
-
-html +=
-"<ul>";
-
-missingHistory.forEach(item => {
-
-html +=
-"<li>" + item + "</li>";
-
-});
-
-html +=
-"</ul>";
+element.innerHTML =
+"⚠️ " +
+item.id +
+" — " +
+item.name;
 
 }
 
-
-html +=
-"<h3>⚠️ หัวข้อคำแนะนำยาที่ยังไม่พบ</h3>";
-
-
-if(missingCounseling.length === 0) {
-
-html +=
-"<p>🟢 ให้คำแนะนำครบทุกหัวข้อ</p>";
-
-} else {
-
-html +=
-"<ul>";
-
-missingCounseling.forEach(item => {
-
-html +=
-"<li>" + item + "</li>";
-
-});
-
-html +=
-"</ul>";
-
-}
-
-
-document.getElementById("result")
-.innerHTML = html;
-
-
-/* Scroll ไปผลลัพธ์ */
-
-document.getElementById("result")
-.scrollIntoView({
-behavior:"smooth"
 });
 
 
-/* บันทึกข้อมูลลง Google Sheets */
-
-saveToGoogleSheet(
-  finalText,
-  result.historyScore,
-  result.counselingScore,
-  missingHistory,
-  missingCounseling
+const historyScore =
+Math.round(
+(historyDone /
+historyChecklist.length) * 100
 );
 
+
+const counselingScore =
+Math.round(
+(counselingDone /
+counselingChecklist.length) * 100
+);
+
+
+document.getElementById(
+"historyScore"
+).innerText =
+"History Score: " +
+historyScore +
+"%";
+
+
+document.getElementById(
+"counselingScore"
+).innerText =
+"Counseling Score: " +
+counselingScore +
+"%";
+
+
+return {
+
+historyScore:
+historyScore,
+
+counselingScore:
+counselingScore,
+
+missingHistory:
+missingHistory,
+
+missingCounseling:
+missingCounseling
 
 };
 
+}
+
+
+// =====================================================
+// SAVE TO GOOGLE SHEETS
+// =====================================================
+
 function saveToGoogleSheet(
-  transcript,
-  historyScore,
-  counselingScore,
-  missingHistory,
-  missingCounseling
+
+transcript,
+historyScore,
+counselingScore,
+missingHistory,
+missingCounseling
+
 ) {
 
-  const sessionId = "S" + Date.now();
-
-  const params = new URLSearchParams({
-    action: "save",
-    callback: "pharmaCallback",
-
-    sessionId: sessionId,
-
-    transcript: transcript,
-
-    historyScore: historyScore,
-
-    counselingScore: counselingScore,
-
-    missingHistory: missingHistory.join(" | "),
-
-    missingCounseling: missingCounseling.join(" | ")
-  });
+const sessionId =
+"S" + Date.now();
 
 
-  // รับคำตอบจาก Apps Script
-  window.pharmaCallback = function(response) {
+const params =
+new URLSearchParams({
 
-    console.log(
-      "Apps Script response:",
-      response
-    );
+action:"save",
 
+callback:"pharmaCallback",
 
-    if (response.success) {
+sessionId:
+sessionId,
 
-      console.log(
-        "บันทึก Google Sheets สำเร็จ"
-      );
+transcript:
+transcript,
 
-      if (typeof statusBox !== "undefined") {
+historyScore:
+historyScore,
 
-        statusBox.innerText =
-          "✅ บันทึกข้อมูลลง Google Sheets แล้ว";
+counselingScore:
+counselingScore,
 
-      }
-    }
+missingHistory:
+missingHistory.join(" | "),
 
-  };
+missingCounseling:
+missingCounseling.join(" | ")
 
-
-  // สร้าง script สำหรับส่งข้อมูล
-  const script =
-    document.createElement("script");
+});
 
 
-  script.src =
-    API_URL + "?" + params.toString();
+window.pharmaCallback =
+function(response) {
 
+console.log(
+"Apps Script response:",
+response
+);
 
-  script.onload = function() {
+if (response.success) {
 
-    console.log(
-      "ส่งข้อมูลไป Apps Script สำเร็จ"
-    );
-
-    script.remove();
-
-  };
-
-
-  script.onerror = function() {
-
-    console.error(
-      "ส่งข้อมูลไป Apps Script ไม่สำเร็จ"
-    );
-
-    if (typeof statusBox !== "undefined") {
-
-      statusBox.innerText =
-        "⚠️ ไม่สามารถบันทึก Google Sheets";
-
-    }
-
-    script.remove();
-
-  };
-
-
-  document.body.appendChild(script);
+statusBox.innerText =
+"✅ บันทึกข้อมูลลง Google Sheets แล้ว";
 
 }
+
+};
+
+
+const script =
+document.createElement("script");
+
+
+script.src =
+API_URL +
+"?" +
+params.toString();
+
+
+script.onload =
+function() {
+
+console.log(
+"ส่งข้อมูลไป Apps Script สำเร็จ"
+);
+
+script.remove();
+
+};
+
+
+script.onerror =
+function() {
+
+console.error(
+"ส่งข้อมูลไป Apps Script ไม่สำเร็จ"
+);
+
+statusBox.innerText =
+"⚠️ ไม่สามารถบันทึก Google Sheets";
+
+script.remove();
+
+};
+
+
+document.body.appendChild(
+script
+);
+
+}
+
+
+// =====================================================
+// NEXT BUTTON
+// =====================================================
+
+document.getElementById("nextBtn")
+.onclick =
+function() {
+
+
+if (!finalText.trim()) {
+
+alert(
+"ยังไม่มีข้อความเสียง"
+);
+
+return;
+
+}
+
+
+statusBox.innerText =
+"🔍 กำลังตรวจสอบข้อมูล...";
+
+
+const result =
+checkChecklist(
+finalText
+);
+
+
+console.log(
+"CHECK RESULT:",
+result
+);
+
+
+// =========================
+// SAVE
+// =========================
+
+saveToGoogleSheet(
+
+finalText,
+
+result.historyScore,
+
+result.counselingScore,
+
+result.missingHistory,
+
+result.missingCounseling
+
+);
+
+
+statusBox.innerText =
+"📊 ตรวจสอบเสร็จแล้ว กำลังบันทึกข้อมูล...";
+
+};
 
 </script>
 
 </body>
-
 </html>
