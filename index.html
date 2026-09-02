@@ -1100,7 +1100,101 @@ behavior:"smooth"
 
 };
 
+function saveToGoogleSheet(
+  transcript,
+  historyScore,
+  counselingScore,
+  missingHistory,
+  missingCounseling
+) {
 
+  const sessionId = "S" + Date.now();
+
+  const params = new URLSearchParams({
+    action: "save",
+    callback: "pharmaCallback",
+
+    sessionId: sessionId,
+
+    transcript: transcript,
+
+    historyScore: historyScore,
+
+    counselingScore: counselingScore,
+
+    missingHistory: missingHistory.join(" | "),
+
+    missingCounseling: missingCounseling.join(" | ")
+  });
+
+
+  // รับคำตอบจาก Apps Script
+  window.pharmaCallback = function(response) {
+
+    console.log(
+      "Apps Script response:",
+      response
+    );
+
+
+    if (response.success) {
+
+      console.log(
+        "บันทึก Google Sheets สำเร็จ"
+      );
+
+      if (typeof statusBox !== "undefined") {
+
+        statusBox.innerText =
+          "✅ บันทึกข้อมูลลง Google Sheets แล้ว";
+
+      }
+    }
+
+  };
+
+
+  // สร้าง script สำหรับส่งข้อมูล
+  const script =
+    document.createElement("script");
+
+
+  script.src =
+    API_URL + "?" + params.toString();
+
+
+  script.onload = function() {
+
+    console.log(
+      "ส่งข้อมูลไป Apps Script สำเร็จ"
+    );
+
+    script.remove();
+
+  };
+
+
+  script.onerror = function() {
+
+    console.error(
+      "ส่งข้อมูลไป Apps Script ไม่สำเร็จ"
+    );
+
+    if (typeof statusBox !== "undefined") {
+
+      statusBox.innerText =
+        "⚠️ ไม่สามารถบันทึก Google Sheets";
+
+    }
+
+    script.remove();
+
+  };
+
+
+  document.body.appendChild(script);
+
+}
 
 </script>
 
