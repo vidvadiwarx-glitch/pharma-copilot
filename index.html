@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Pharma Copilot</title>
+
+<style>
+
+body {
+    font-family: Arial, sans-serif;
+    background: #f5f3ff;
+    margin: 0;
+    padding: 30px;
+}
+
+.container {
+    max-width: 900px;
+    margin: auto;
+    background: white;
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+}
+
+h1 {
+    text-align: center;
+}
+
+button {
+    padding: 12px 20px;
+    margin: 5px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+#startBtn {
+    background: #7c3aed;
+    color: white;
+}
+
+#stopBtn {
+    background: #ef4444;
+    color: white;
+}
+
+#nextBtn {
+    background: #10b981;
+    color: white;
+}
+
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+#status {
+    margin-top: 20px;
+    font-weight: bold;
+}
+
+#transcript {
+    margin-top: 20px;
+    min-height: 150px;
+    padding: 20px;
+    background: #f3f4f6;
+    border-radius: 10px;
+    white-space: pre-wrap;
+}
+
+#result {
+    margin-top: 20px;
+}
+
+.item {
+    padding: 10px;
+    margin: 5px 0;
+    border-radius: 8px;
+}
+
+.done {
+    background: #dcfce7;
+}
+
+.missing {
+    background: #fee2e2;
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+<div class="container">
+
+<h1>💊 Pharma Copilot</h1>
+
+<p>
+ระบบช่วยตรวจสอบการซักประวัติและการให้คำแนะนำยา
+</p>
+
+
+<div>
+
+<button id="startBtn">
+🎙 START
+</button>
+
+<button id="stopBtn" disabled>
+⏹ STOP
+</button>
+
+<button id="nextBtn" disabled>
+➡ NEXT
+</button>
+
+</div>
+
+
+<div id="status">
+สถานะ: พร้อมใช้งาน
+</div>
+
+
+<h3>ข้อความที่ตรวจจับได้</h3>
+
+<div id="transcript">
+ยังไม่มีข้อความ
+</div>
+
+
+<div id="result"></div>
+
+</div>
+
+
+<script>
+
+
+// =================================================
+// 🔴🔴🔴 ใส่ URL ของ GOOGLE APPS SCRIPT ตรงนี้ 🔴🔴🔴
+// =================================================
+
+const API_URL =
+"https://script.google.com/macros/s/AKfycby-1f6yKecrhwL6zphf8qiyWlt5lCY_E8RMAZhNB9RwyfZbNy_bQ7a0JS2jubMfQgE9qA/exec";
+
+
+// =================================================
+// ตัวแปร
+// =================================================
+
+let recognition;
+
+let isListening = false;
+
+let finalText = "";
+
+let historyChecklist = [];
+
+let counselingChecklist = [];
+
+
+// =================================================
+// ตรวจสอบ Browser
+// =================================================
+
+const SpeechRecognition =
+    window.SpeechRecognition ||
+    window.webkitSpeechRecognition;
+
+
+if (!SpeechRecognition) {
+
+    alert(
+        "Browser นี้ไม่รองรับ Speech Recognition\nกรุณาใช้ Google Chrome"
+    );
+
+}
+
+
+// =================================================
+// สร้าง Speech Recognition
+// =================================================
+
+if (SpeechRecognition) {
+
+    recognition = new SpeechRecognition();
+
+    recognition.lang = "th-TH";
+
+    recognition.continuous = true;
+
+    recognition.interimResults = true;
+
+    recognition.maxAlternatives = 1;
+
+
+    // =================================================
+    // เมื่อเริ่มฟัง
+    // =================================================
+
+    recognition.onstart = function() {
+
+        document.getElementById("status").innerText =
+            "สถานะ: 🎙 กำลังฟัง...";
+
+        document.getElementById("startBtn").disabled = true;
+
+        document.getElementById("stopBtn").disabled = false;
+
+        document.getElementById("nextBtn").disabled = false;
+
+    };
+
+
+    // =================================================
+    // เมื่อได้รับเสียง
+    // =================================================
+
+    recognition.onresult = function(event) {
+
+        let interimText = "";
+
+
+        for (
+            let i = event.resultIndex;
+            i < event.results.length;
+            i++
+        ) {
+
+            const text =
+                event.results[i][0].transcript;
+
+
+            if (event.results[i].isFinal) {
+
+                finalText += text + " ";
+
+            }
+
+            else {
+
+                interimText += text;
+
+            }
+
+        }
+
+
+        document.getElementById("transcript").innerText =
+            finalText + interimText;
+
+    };
+
+
+    // =================================================
+    // เมื่อ Speech Recognition หยุดเอง
+    // =================================================
+
+    recognition.onend = function() {
+
+        if (isListening) {
+
+            document.getElementById("status").innerText =
+                "สถานะ: 🔄 กำลังฟังต่อ...";
+
+
+            setTimeout(function() {
+
+                try {
+
+                    recognition.start();
+
+                }
+
+                catch(error) {
+
+                    console.log(
+                        "Restart error:",
+                        error
+                    );
+
+                }
+
+            }, 300);
+
+        }
+
+        else {
+
+            document.getElementById("status").innerText =
+                "สถานะ: ⏹ หยุดแล้ว";
+
+            document.getElementById("startBtn").disabled = false;
+
+            document.getElementById("stopBtn").disabled = true;
+
+        }
+
+    };
+
+
+    // =================================================
+    // Error
+    // =================================================
+
+    recognition.onerror = function(event) {
+
+        console.log(
+            "Speech Recognition Error:",
+            event.error
+        );
+
+
+        if (event.error === "not-allowed") {
+
+            alert(
+                "กรุณาอนุญาตให้เว็บไซต์ใช้ไมโครโฟน"
+            );
+
+            isListening = false;
+
+        }
+
+
+        if (event.error === "audio-capture") {
+
+            alert(
+                "ไม่พบไมโครโฟน กรุณาตรวจสอบไมโครโฟนของเครื่อง"
+            );
+
+            isListening = false;
+
+        }
+
+    };
+
+}
+
+
+// =================================================
+// START
+// =================================================
+
+document
+.getElementById("startBtn")
+.addEventListener("click", function() {
+
+    if (!recognition) {
+
+        alert(
+            "Browser ไม่รองรับ Speech Recognition"
+        );
+
+        return;
+
+    }
+
+
+    finalText = "";
+
+
+    document.getElementById("transcript").innerText =
+        "";
+
+
+    document.getElementById("result").innerHTML =
+        "";
+
+
+    isListening = true;
+
+
+    try {
+
+        recognition.start();
+
+    }
+
+    catch(error) {
+
+        console.log(
+            "Start error:",
+            error
+        );
+
+    }
+
+});
+
+
+// =================================================
+// STOP
+// =================================================
+
+document
+.getElementById("stopBtn")
+.addEventListener("click", function() {
+
+    if (!recognition) return;
+
+
+    isListening = false;
+
+
+    recognition.stop();
+
+
+    document.getElementById("status").innerText =
+        "สถานะ: ⏹ หยุดแล้ว";
+
+
+    document.getElementById("startBtn").disabled =
+        false;
+
+
+    document.getElementById("stopBtn").disabled =
+        true;
+
+});
+
+
+// =================================================
+// NEXT
+// =================================================
+
+document
+.getElementById("nextBtn")
+.addEventListener("click", function() {
+
+    checkHistory();
+
+});
+
+
+// =================================================
+// โหลด Checklist จาก Google Apps Script
+// =================================================
+
+async function loadChecklist() {
+
+    try {
+
+        const response =
+            await fetch(
+                API_URL,
+                {
+
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "text/plain;charset=utf-8"
+                    },
+
+                    body: JSON.stringify({
+
+                        action: "getChecklist"
+
+                    })
+
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        historyChecklist =
+            data.history || [];
+
+
+        counselingChecklist =
+            data.counseling || [];
+
+
+        console.log(
+            "Checklist loaded:",
+            data
+        );
+
+
+        document.getElementById("status").innerText =
+            "สถานะ: พร้อมใช้งาน";
+
+    }
+
+    catch(error) {
+
+        console.error(
+            "Checklist error:",
+            error
+        );
+
+
+        document.getElementById("status").innerText =
+            "⚠️ ไม่สามารถเชื่อมต่อ Google Apps Script";
+
+    }
+
+}
+
+
+// =================================================
+// ตรวจสอบประวัติ
+// =================================================
+
+function checkHistory() {
+
+    const text =
+        finalText.toLowerCase();
+
+
+    let missing = [];
+
+    let completed = [];
+
+
+    historyChecklist.forEach(function(item) {
+
+        let found = false;
+
+
+        item.keywords.forEach(function(keyword) {
+
+            if (
+                text.includes(
+                    keyword.toLowerCase()
+                )
+            ) {
+
+                found = true;
+
+            }
+
+        });
+
+
+        if (found) {
+
+            completed.push(item);
+
+        }
+
+        else {
+
+            missing.push(item);
+
+        }
+
+    });
+
+
+    showHistoryResult(
+        completed,
+        missing
+    );
+
+
+    saveSession(
+        missing
+    );
+
+}
+
+
+// =================================================
+// แสดงผล
+// =================================================
+
+function showHistoryResult(
+    completed,
+    missing
+) {
+
+    let html = "";
+
+
+    html +=
+        "<h2>📋 ผลการตรวจสอบ</h2>";
+
+
+    html +=
+        "<p>ตรวจพบ " +
+        completed.length +
+        " / " +
+        historyChecklist.length +
+        " หัวข้อ</p>";
+
+
+    html +=
+        "<h3>✅ ตรวจพบ</h3>";
+
+
+    completed.forEach(function(item) {
+
+        html +=
+            `<div class="item done">
+                ${item.id} - ${item.name}
+             </div>`;
+
+    });
+
+
+    html +=
+        "<h3>⚠️ หัวข้อที่ยังไม่พบ</h3>";
+
+
+    missing.forEach(function(item) {
+
+        html +=
+            `<div class="item missing">
+                ${item.id} - ${item.name}
+             </div>`;
+
+    });
+
+
+    document.getElementById("result")
+        .innerHTML = html;
+
+}
+
+
+// =================================================
+// บันทึกลง Google Sheets
+// =================================================
+
+async function saveSession(
+    missingHistory
+) {
+
+    try {
+
+        const response =
+            await fetch(
+                API_URL,
+                {
+
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "text/plain;charset=utf-8"
+                    },
+
+                    body: JSON.stringify({
+
+                        action: "saveSession",
+
+                        sessionId:
+                            Date.now().toString(),
+
+                        transcript:
+                            finalText,
+
+                        historyScore:
+                            historyChecklist.length -
+                            missingHistory.length,
+
+                        counselingScore:
+                            "",
+
+                        missingHistory:
+                            missingHistory
+                            .map(
+                                x => x.id
+                            )
+                            .join(", "),
+
+                        missingCounseling:
+                            ""
+
+                    })
+
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        console.log(
+            "Save result:",
+            data
+        );
+
+    }
+
+    catch(error) {
+
+        console.error(
+            "Save error:",
+            error
+        );
+
+    }
+
+}
+
+
+// =================================================
+// เริ่มต้นระบบ
+// =================================================
+
+loadChecklist();
+
+
+</script>
+
+</body>
+
+</html>
