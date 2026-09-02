@@ -77,62 +77,57 @@
 
 <script>
 
+const SpeechRecognition =
+  window.SpeechRecognition ||
+  window.webkitSpeechRecognition;
+
 const startBtn = document.getElementById("startBtn");
 const stopBtn = document.getElementById("stopBtn");
 const statusBox = document.getElementById("status");
 const transcriptBox = document.getElementById("transcript");
 
-const SpeechRecognition =
-  window.SpeechRecognition ||
-  window.webkitSpeechRecognition;
-
 if (!SpeechRecognition) {
 
-  statusBox.innerHTML =
-    "❌ Browser นี้ไม่รองรับ Speech Recognition";
+  statusBox.innerText =
+    "❌ Browser ไม่รองรับ Speech Recognition";
 
 } else {
 
   const recognition = new SpeechRecognition();
 
   recognition.lang = "th-TH";
-
   recognition.continuous = true;
-
   recognition.interimResults = true;
-
   recognition.maxAlternatives = 1;
 
-
-  let listening = false;
+  let isListening = false;
+  let finalText = "";
 
 
   // =========================
-  // START
+  // กด START
   // =========================
 
-  startBtn.onclick = function() {
+  startBtn.onclick = () => {
 
-    console.log("START clicked");
-
-    listening = true;
-
+    finalText = "";
     transcriptBox.innerText = "";
 
+    isListening = true;
+
     statusBox.innerText =
-      "🎙️ กำลังฟัง... พูดได้เลย";
+      "🟡 กำลังเปิดระบบรับเสียง...";
 
     startBtn.disabled = true;
-
     stopBtn.disabled = false;
 
     try {
 
       recognition.start();
 
-    } catch (error) {
+    } catch (e) {
 
-      console.log(error);
+      console.log("START ERROR:", e);
 
     }
 
@@ -140,28 +135,28 @@ if (!SpeechRecognition) {
 
 
   // =========================
-  // เมื่อเริ่มฟัง
+  // เริ่มรับเสียง
   // =========================
 
-  recognition.onstart = function() {
+  recognition.onstart = () => {
 
-    console.log("Recognition started");
+    console.log("ONSTART");
 
     statusBox.innerText =
-      "🟢 กำลังฟังเสียง...";
+      "🟢 ไมค์กำลังฟังอยู่ — ลองพูดว่า สวัสดีค่ะ";
 
   };
 
 
   // =========================
-  // รับคำพูด
+  // ได้ผลการรู้จำเสียง
   // =========================
 
-  recognition.onresult = function(event) {
+  recognition.onresult = (event) => {
 
-    console.log("RESULT EVENT");
+    console.log("ONRESULT", event);
 
-    let text = "";
+    let interimText = "";
 
     for (
       let i = event.resultIndex;
@@ -169,16 +164,31 @@ if (!SpeechRecognition) {
       i++
     ) {
 
-      text += event.results[i][0].transcript;
+      const transcript =
+        event.results[i][0].transcript;
+
+      console.log(
+        "เสียงที่จับได้:",
+        transcript
+      );
+
+      if (event.results[i].isFinal) {
+
+        finalText += transcript + " ";
+
+      } else {
+
+        interimText += transcript;
+
+      }
 
     }
 
-    console.log("ได้ข้อความ:", text);
-
-    transcriptBox.innerText = text;
+    transcriptBox.innerText =
+      finalText + interimText;
 
     statusBox.innerText =
-      "🟢 ได้ยิน: " + text;
+      "🟢 ได้ยินเสียงแล้ว";
 
   };
 
@@ -187,67 +197,67 @@ if (!SpeechRecognition) {
   // ERROR
   // =========================
 
-  recognition.onerror = function(event) {
+  recognition.onerror = (event) => {
 
-    console.log(
-      "Speech error:",
+    console.error(
+      "SPEECH ERROR:",
       event.error
     );
 
     statusBox.innerText =
-      "❌ Error: " + event.error;
+      "❌ Speech Error: " + event.error;
 
   };
 
 
   // =========================
-  // STOP
+  // หยุด
   // =========================
 
-  stopBtn.onclick = function() {
+  stopBtn.onclick = () => {
 
-    console.log("STOP clicked");
-
-    listening = false;
+    isListening = false;
 
     recognition.stop();
 
     statusBox.innerText =
-      "⏹️ หยุดฟังแล้ว";
+      "⏹️ หยุดรับเสียงแล้ว";
 
     startBtn.disabled = false;
-
     stopBtn.disabled = true;
 
   };
 
 
   // =========================
-  // END
+  // Recognition หยุดเอง
   // =========================
 
-  recognition.onend = function() {
+  recognition.onend = () => {
 
-    console.log("Recognition ended");
+    console.log("ONEND");
 
-    if (listening) {
+    if (isListening) {
 
       statusBox.innerText =
-        "🔄 กำลังเริ่มฟังใหม่...";
+        "🔄 ระบบหยุดชั่วคราว กำลังเปิดใหม่...";
 
-      setTimeout(function() {
+      setTimeout(() => {
 
         try {
 
           recognition.start();
 
-        } catch (error) {
+        } catch (e) {
 
-          console.log(error);
+          console.log(
+            "RESTART ERROR:",
+            e
+          );
 
         }
 
-      }, 300);
+      }, 500);
 
     }
 
