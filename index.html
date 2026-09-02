@@ -1,811 +1,259 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pharma Copilot</title>
 
-<title>Pharma Copilot</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 20px;
+      background: #f5f3ff;
+    }
 
-<style>
-body {
-    font-family: Arial, sans-serif;
-    background: #f5f7fb;
-    margin: 0;
-    padding: 30px;
-    color: #333;
-}
+    h1 {
+      text-align: center;
+    }
 
-.container {
-    max-width: 900px;
-    margin: auto;
-}
+    button {
+      padding: 15px 25px;
+      margin: 5px;
+      font-size: 18px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+    }
 
-h1 {
-    text-align: center;
-}
+    #startBtn {
+      background: #6c4ab6;
+      color: white;
+    }
 
-.card {
-    background: white;
-    padding: 25px;
-    margin-top: 20px;
-    border-radius: 15px;
-    box-shadow: 0 3px 12px rgba(0,0,0,0.08);
-}
+    #stopBtn {
+      background: #999;
+      color: white;
+    }
 
-button {
-    padding: 12px 25px;
-    margin: 5px;
-    border: none;
-    border-radius: 10px;
-    font-size: 16px;
-    cursor: pointer;
-}
+    #status {
+      margin: 20px 0;
+      padding: 15px;
+      background: white;
+      border-radius: 10px;
+      font-size: 18px;
+    }
 
-#startBtn {
-    background: #4CAF50;
-    color: white;
-}
-
-#stopBtn {
-    background: #e53935;
-    color: white;
-}
-
-#nextBtn {
-    background: #1976d2;
-    color: white;
-}
-
-button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-#status {
-    text-align: center;
-    font-weight: bold;
-    margin: 15px;
-}
-
-#transcript {
-    min-height: 150px;
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    padding: 15px;
-    background: #fafafa;
-    white-space: pre-wrap;
-}
-
-.check-item {
-    padding: 12px;
-    margin: 6px 0;
-    border-radius: 8px;
-    background: #f1f1f1;
-}
-
-.done {
-    background: #d9f7df;
-}
-
-.missing {
-    background: #ffe0e0;
-}
-
-.score {
-    font-size: 20px;
-    font-weight: bold;
-}
-
-#resultBox {
-    display: none;
-}
-</style>
+    #transcript {
+      margin-top: 20px;
+      padding: 20px;
+      min-height: 200px;
+      background: white;
+      border-radius: 10px;
+      font-size: 20px;
+      line-height: 1.8;
+      white-space: pre-wrap;
+    }
+  </style>
 </head>
-
 
 <body>
 
-<div class="container">
+  <h1>💊 Pharma Copilot</h1>
 
-<h1>💊 Pharma Copilot</h1>
+  <div style="text-align:center;">
+    <button id="startBtn">🎙️ START</button>
+    <button id="stopBtn" disabled>⏹️ STOP</button>
+  </div>
 
-<div class="card">
+  <div id="status">
+    สถานะ: ยังไม่ได้เริ่ม
+  </div>
 
-<div id="status">
-🔴 ยังไม่ได้เริ่ม
-</div>
-
-<div style="text-align:center;">
-
-<button id="startBtn">
-🎙️ START
-</button>
-
-<button id="stopBtn" disabled>
-⏹️ STOP
-</button>
-
-<button id="nextBtn">
-➡️ NEXT
-</button>
-
-</div>
-
-</div>
-
-
-<div class="card">
-
-<h2>📝 Transcript</h2>
-
-<div id="transcript">
-ยังไม่มีข้อความ
-</div>
-
-</div>
-
-
-<div class="card">
-
-<h2>📋 Checklist การซักประวัติ</h2>
-
-<div id="historyChecklist"></div>
-
-</div>
-
-
-<div class="card" id="resultBox">
-
-<h2>📊 ผลการตรวจสอบ</h2>
-
-<div id="result"></div>
-
-</div>
-
-
-</div>
-
+  <div id="transcript">
+    ข้อความที่ได้ยินจะขึ้นตรงนี้...
+  </div>
 
 <script>
 
-/* =====================================
-   GOOGLE APPS SCRIPT
-===================================== */
-
-const API_URL =
-"https://script.google.com/macros/s/AKfycbz7KRPTS__BZKxORoDi42W4DAVCEyMekpQg8X--vbLsTUkmR6Xud4Hmu1kZnPFtZ6QobA/exec";
-
-
-/* =====================================
-   HISTORY CHECKLIST
-   H01 - H16
-===================================== */
-
-const historyChecklist = [
-
-{
-id:"H01",
-name:"ใครคือผู้ป่วย",
-keywords:[
-"ชื่อ",
-"ผู้ป่วย",
-"คนไข้",
-"ชื่ออะไร",
-"ชื่ออะไรคะ",
-"ชื่ออะไรครับ"
-]
-},
-
-{
-id:"H02",
-name:"อายุ",
-keywords:[
-"อายุ",
-"กี่ปี",
-"อายุเท่าไหร่",
-"อายุเท่าไร"
-]
-},
-
-{
-id:"H03",
-name:"น้ำหนัก",
-keywords:[
-"น้ำหนัก",
-"หนักกี่กิโล",
-"หนักเท่าไหร่",
-"หนักเท่าไร",
-"กี่กิโล"
-]
-},
-
-{
-id:"H04",
-name:"เพศ / ตั้งครรภ์ / ให้นมบุตร",
-keywords:[
-"เพศ",
-"ผู้ชาย",
-"ผู้หญิง",
-"ตั้งครรภ์",
-"ท้อง",
-"ตั้งท้อง",
-"ให้นม",
-"ให้นมลูก"
-]
-},
-
-{
-id:"H05",
-name:"วันนี้มาด้วยโรคหรืออาการอะไร",
-keywords:[
-"เป็นอะไร",
-"มีอาการอะไร",
-"อาการอะไร",
-"มาด้วยอาการ",
-"วันนี้เป็นอะไร"
-]
-},
-
-{
-id:"H06",
-name:"เริ่มมีอาการเมื่อไร / เป็นมานานเท่าไร",
-keywords:[
-"เป็นมานาน",
-"เริ่มเป็น",
-"เป็นตั้งแต่",
-"กี่วัน",
-"เมื่อไร",
-"เป็นมากี่วัน",
-"เป็นตั้งแต่วันไหน",
-"เป็นมานานแค่ไหน"
-]
-},
-
-{
-id:"H07",
-name:"ความรุนแรงของอาการเทียบกับวันแรก",
-keywords:[
-"รุนแรง",
-"หนักขึ้น",
-"ดีขึ้น",
-"แย่ลง",
-"เทียบกับวันแรก",
-"ต่างกันไหม",
-"ตอนนี้กับวันแรก"
-]
-},
-
-{
-id:"H08",
-name:"เคยมีอาการเช่นนี้มาก่อน",
-keywords:[
-"เคยเป็น",
-"เคยมีอาการ",
-"มาก่อน",
-"เคยเป็นมาก่อน"
-]
-},
-
-{
-id:"H09",
-name:"มีอาการอื่นร่วม",
-keywords:[
-"อาการร่วม",
-"มีอาการอื่น",
-"ร่วมด้วย",
-"อาการอื่นร่วม"
-]
-},
-
-{
-id:"H10",
-name:"สิ่งที่ทำให้อาการแย่ลง",
-keywords:[
-"แย่ลง",
-"อาการแย่ลง",
-"กระตุ้น",
-"ทำให้อาการมากขึ้น"
-]
-},
-
-{
-id:"H11",
-name:"สิ่งที่ทำให้อาการดีขึ้น",
-keywords:[
-"ดีขึ้น",
-"อาการดีขึ้น",
-"ช่วย",
-"บรรเทา",
-"ทำให้อาการดีขึ้น"
-]
-},
-
-{
-id:"H12",
-name:"โรคประจำตัว / ยาที่ได้รับ",
-keywords:[
-"โรคประจำตัว",
-"ประจำ",
-"ยาประจำ",
-"ยาที่ใช้",
-"กินยาอะไร",
-"ใช้ยาอะไร",
-"ทุกวัน"
-]
-},
-
-{
-id:"H13",
-name:"ประวัติสูบบุหรี่ / ดื่มแอลกอฮอล์",
-keywords:[
-"บุหรี่",
-"สูบบุหรี่",
-"เหล้า",
-"ดื่มเหล้า",
-"แอลกอฮอล์",
-"สุรา"
-]
-},
-
-{
-id:"H14",
-name:"ใช้ยา/ผลิตภัณฑ์อื่นเพื่อบรรเทาอาการ",
-keywords:[
-"บรรเทาอาการ",
-"รักษาอาการ",
-"เคยกินยา",
-"ซื้อยากิน",
-"ใช้ผลิตภัณฑ์",
-"ใช้ยาอะไร"
-]
-},
-
-{
-id:"H15",
-name:"ประวัติแพ้ยา / แพ้สิ่งอื่น",
-keywords:[
-"แพ้ยา",
-"แพ้อาหาร",
-"แพ้อะไร",
-"ประวัติแพ้",
-"แพ้ยาอะไร"
-]
-},
-
-{
-id:"H16",
-name:"เคยใช้ยานี้และมีอาการไม่พึงประสงค์",
-keywords:[
-"เคยใช้ยานี้",
-"เคยกินยานี้",
-"เคยทาน",
-"เคยกิน",
-"เคยใช้",
-"ผลข้างเคียง",
-"อาการไม่พึงประสงค์"
-]
-}
-
-];
-
-
-/* =====================================
-   COUNSELING CHECKLIST
-   C01 - C04
-===================================== */
-
-const counselingChecklist = [
-
-{
-id:"C01",
-name:"วิธีใช้ยา",
-keywords:[
-"วิธีใช้",
-"วิธีกิน",
-"กินครั้งละ",
-"หลังอาหาร",
-"ก่อนอาหาร",
-"ทานหลังอาหาร",
-"ทานก่อนอาหาร"
-]
-},
-
-{
-id:"C02",
-name:"ผลข้างเคียง",
-keywords:[
-"ผลข้างเคียง",
-"อาการข้างเคียง",
-"อาการไม่พึงประสงค์",
-"แพ้ยา"
-]
-},
-
-{
-id:"C03",
-name:"การเก็บรักษายา",
-keywords:[
-"เก็บยา",
-"การเก็บรักษา",
-"เก็บไว้",
-"อุณหภูมิ"
-]
-},
-
-{
-id:"C04",
-name:"การรักษาโดยไม่ใช้ยา / การดูแลตนเอง",
-keywords:[
-"ดูแลตัวเอง",
-"ดูแลตนเอง",
-"ไม่ใช้ยา",
-"พักผ่อน",
-"ดื่มน้ำ",
-"ดูแล"
-]
-}
-
-];
-
-
-/* =====================================
-   SPEECH RECOGNITION
-===================================== */
+const startBtn = document.getElementById("startBtn");
+const stopBtn = document.getElementById("stopBtn");
+const statusBox = document.getElementById("status");
+const transcriptBox = document.getElementById("transcript");
 
 const SpeechRecognition =
-window.SpeechRecognition ||
-window.webkitSpeechRecognition;
-
-let recognition;
-
-let isListening = false;
-
-let finalText = "";
-
+  window.SpeechRecognition ||
+  window.webkitSpeechRecognition;
 
 if (!SpeechRecognition) {
 
-document.getElementById("status").innerText =
-"❌ Browser นี้ไม่รองรับ Speech Recognition";
+  statusBox.innerHTML =
+    "❌ Browser นี้ไม่รองรับ Speech Recognition";
 
 } else {
 
-recognition = new SpeechRecognition();
+  const recognition = new SpeechRecognition();
 
-recognition.lang = "th-TH";
+  recognition.lang = "th-TH";
 
-recognition.continuous = true;
+  recognition.continuous = true;
 
-recognition.interimResults = true;
+  recognition.interimResults = true;
 
-recognition.maxAlternatives = 1;
-
-
-/* START */
-
-recognition.onstart = function() {
-
-document.getElementById("status").innerText =
-"🟢 กำลังฟังเสียง...";
-
-document.getElementById("startBtn").disabled = true;
-
-document.getElementById("stopBtn").disabled = false;
-
-};
+  recognition.maxAlternatives = 1;
 
 
-/* RESULT */
+  let listening = false;
 
-recognition.onresult = function(event) {
 
-let interimText = "";
+  // =========================
+  // START
+  // =========================
 
-for (
-let i = event.resultIndex;
-i < event.results.length;
-i++
-) {
+  startBtn.onclick = function() {
 
-let text =
-event.results[i][0].transcript;
+    console.log("START clicked");
 
-if (event.results[i].isFinal) {
+    listening = true;
 
-finalText += text + " ";
+    transcriptBox.innerText = "";
 
-} else {
+    statusBox.innerText =
+      "🎙️ กำลังฟัง... พูดได้เลย";
 
-interimText += text;
+    startBtn.disabled = true;
+
+    stopBtn.disabled = false;
+
+    try {
+
+      recognition.start();
+
+    } catch (error) {
+
+      console.log(error);
+
+    }
+
+  };
+
+
+  // =========================
+  // เมื่อเริ่มฟัง
+  // =========================
+
+  recognition.onstart = function() {
+
+    console.log("Recognition started");
+
+    statusBox.innerText =
+      "🟢 กำลังฟังเสียง...";
+
+  };
+
+
+  // =========================
+  // รับคำพูด
+  // =========================
+
+  recognition.onresult = function(event) {
+
+    console.log("RESULT EVENT");
+
+    let text = "";
+
+    for (
+      let i = event.resultIndex;
+      i < event.results.length;
+      i++
+    ) {
+
+      text += event.results[i][0].transcript;
+
+    }
+
+    console.log("ได้ข้อความ:", text);
+
+    transcriptBox.innerText = text;
+
+    statusBox.innerText =
+      "🟢 ได้ยิน: " + text;
+
+  };
+
+
+  // =========================
+  // ERROR
+  // =========================
+
+  recognition.onerror = function(event) {
+
+    console.log(
+      "Speech error:",
+      event.error
+    );
+
+    statusBox.innerText =
+      "❌ Error: " + event.error;
+
+  };
+
+
+  // =========================
+  // STOP
+  // =========================
+
+  stopBtn.onclick = function() {
+
+    console.log("STOP clicked");
+
+    listening = false;
+
+    recognition.stop();
+
+    statusBox.innerText =
+      "⏹️ หยุดฟังแล้ว";
+
+    startBtn.disabled = false;
+
+    stopBtn.disabled = true;
+
+  };
+
+
+  // =========================
+  // END
+  // =========================
+
+  recognition.onend = function() {
+
+    console.log("Recognition ended");
+
+    if (listening) {
+
+      statusBox.innerText =
+        "🔄 กำลังเริ่มฟังใหม่...";
+
+      setTimeout(function() {
+
+        try {
+
+          recognition.start();
+
+        } catch (error) {
+
+          console.log(error);
+
+        }
+
+      }, 300);
+
+    }
+
+  };
 
 }
-
-}
-
-
-document.getElementById("transcript").innerText =
-finalText + interimText;
-
-};
-
-
-/* END */
-
-recognition.onend = function() {
-
-if (isListening) {
-
-setTimeout(function() {
-
-try {
-
-recognition.start();
-
-} catch(e) {}
-
-},300);
-
-}
-
-};
-
-
-/* ERROR */
-
-recognition.onerror = function(event) {
-
-console.log("Speech error:", event.error);
-
-if(event.error === "not-allowed") {
-
-isListening = false;
-
-document.getElementById("status").innerText =
-"❌ ไม่ได้รับอนุญาตให้ใช้ไมโครโฟน";
-
-}
-
-};
-
-}
-
-
-/* =====================================
-   START BUTTON
-===================================== */
-
-document.getElementById("startBtn").onclick = function() {
-
-if(!recognition) return;
-
-finalText = "";
-
-isListening = true;
-
-document.getElementById("transcript").innerText =
-"";
-
-try {
-
-recognition.start();
-
-} catch(e) {
-
-console.log(e);
-
-}
-
-};
-
-
-/* =====================================
-   STOP BUTTON
-===================================== */
-
-document.getElementById("stopBtn").onclick = function() {
-
-isListening = false;
-
-if(recognition) {
-
-recognition.stop();
-
-}
-
-document.getElementById("status").innerText =
-"⏹️ หยุดบันทึกเสียงแล้ว";
-
-document.getElementById("startBtn").disabled = false;
-
-document.getElementById("stopBtn").disabled = true;
-
-};
-
-
-/* =====================================
-   CHECKLIST DISPLAY
-===================================== */
-
-function displayChecklist() {
-
-const container =
-document.getElementById("historyChecklist");
-
-container.innerHTML = "";
-
-const text =
-finalText.toLowerCase();
-
-
-let completed = 0;
-
-
-historyChecklist.forEach(function(item) {
-
-let found = false;
-
-
-for(let keyword of item.keywords) {
-
-if(text.includes(keyword.toLowerCase())) {
-
-found = true;
-
-break;
-
-}
-
-}
-
-
-if(found) {
-
-completed++;
-
-}
-
-
-const div =
-document.createElement("div");
-
-div.className =
-"check-item " +
-(found ? "done" : "missing");
-
-
-div.innerHTML =
-(found ? "☑️ " : "☐ ") +
-"<b>" +
-item.id +
-"</b> - " +
-item.name;
-
-
-container.appendChild(div);
-
-});
-
-
-return completed;
-
-}
-
-
-/* =====================================
-   NEXT BUTTON
-===================================== */
-
-document.getElementById("nextBtn").onclick = function() {
-
-const score =
-displayChecklist();
-
-
-const total =
-historyChecklist.length;
-
-
-let missing = [];
-
-
-const text =
-finalText.toLowerCase();
-
-
-historyChecklist.forEach(function(item) {
-
-let found = false;
-
-
-for(let keyword of item.keywords) {
-
-if(text.includes(keyword.toLowerCase())) {
-
-found = true;
-
-break;
-
-}
-
-}
-
-
-if(!found) {
-
-missing.push(
-item.id + " - " + item.name
-);
-
-}
-
-});
-
-
-document.getElementById("resultBox").style.display =
-"block";
-
-
-let html =
-
-"<div class='score'>" +
-
-"ตรวจพบ " +
-score +
-" / " +
-total +
-" หัวข้อ" +
-
-"</div>";
-
-
-if(missing.length > 0) {
-
-html +=
-
-"<h3>⚠️ หัวข้อที่ยังไม่ได้พูด</h3>" +
-
-"<ul>";
-
-missing.forEach(function(item) {
-
-html +=
-"<li>" + item + "</li>";
-
-});
-
-html += "</ul>";
-
-} else {
-
-html +=
-"<h3>✅ ครบทุกหัวข้อ</h3>";
-
-}
-
-
-html +=
-
-"<hr>" +
-
-"<h2>💊 การให้คำแนะนำการใช้ยา</h2>" +
-
-"<p>" +
-"หลังจากจ่ายยา ระบบสามารถตรวจหัวข้อ C01–C04 ได้"
-+
-"</p>";
-
-
-document.getElementById("result").innerHTML =
-html;
-
-};
-
-
-/* =====================================
-   INITIAL CHECKLIST
-===================================== */
-
-displayChecklist();
 
 </script>
 
